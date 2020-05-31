@@ -11,7 +11,7 @@ const {
 const { RoleType } = require("./role-type");
 const { db } = require("../pg-adapter");
 
-const Account = new GraphQLObjectType({
+const Model = new GraphQLObjectType({
     name: "Account",
     type: "Query",
     fields: {
@@ -27,12 +27,13 @@ const Account = new GraphQLObjectType({
 });
 
 const All = () => ({
-    type: new GraphQLList(Account),
+    type: new GraphQLList(Model),
     resolve: async (input) => {
         const query = `SELECT a.accountId, a.firstName, a.lastName,
         a.email, a.verified, r.roleId, r.display, r.description
         FROM wwi.account a INNER JOIN wwi.role r
-        ON a.roleId = r.roleId`;
+        ON a.roleId = r.roleId 
+        ORDER BY a.firstName`;
 
         return db
             .any(query)
@@ -63,14 +64,15 @@ const All = () => ({
 });
 
 const ById = () =>  ({
-    type: Account,
+    type: Model,
     args: { accountId: { type: GraphQLNonNull(GraphQLID) } },
     resolve: async (input, args) => {
         const query = `SELECT a.accountId, a.firstName, a.lastName,
         a.email, a.verified, r.roleId, r.display, r.description
         FROM wwi.account a INNER JOIN wwi.role r
         ON a.roleId = r.roleId
-        WHERE accountId =  $1`;
+        WHERE accountId =  $1 
+        ORDER BY a.firstName`;
         const values = [args.accountId];
 
         return db
@@ -100,7 +102,7 @@ const ById = () =>  ({
 });
 
 const Add = () => ({
-    type: Account,
+    type: Model,
     args: {
         firstName: { type: GraphQLNonNull(GraphQLString) },
         lastName: { type: GraphQLNonNull(GraphQLString) },
@@ -121,7 +123,7 @@ const Add = () => ({
 });
 
 const Update = () => ({
-    type: Account,
+    type: Model,
     args: {
         accountId: { type: GraphQLNonNull(GraphQLInt) },
         firstName: { type: GraphQLNonNull(GraphQLString) },
@@ -150,7 +152,7 @@ const Update = () => ({
 });
 
 const Delete = () => ({
-    type: Account,
+    type: Model,
     args: {
         accountId: { type: GraphQLNonNull(GraphQLInt) },
     },
@@ -168,7 +170,7 @@ const Delete = () => ({
 });
 
 exports.AccountType = {
-    model: Account,
+    model: Model,
     query: {
         all: All,
         one: ById,

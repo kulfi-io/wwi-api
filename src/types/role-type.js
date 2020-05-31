@@ -9,7 +9,7 @@ const {
 } = graphql;
 const { db } = require("../pg-adapter");
 
-const Role = new GraphQLObjectType({
+const Model = new GraphQLObjectType({
     name: "Role",
     type: "Query",
     fields: {
@@ -20,10 +20,11 @@ const Role = new GraphQLObjectType({
 });
 
 const All = () => ({
-    type: new GraphQLList(Role),
+    type: new GraphQLList(Model),
     resolve: async (input) => {
         const query = `SELECT r.roleId, r.display, r.description 
-                FROM wwi.role r `;
+                FROM wwi.role r 
+                ORDER BY r.display`;
 
         return db
             .many(query)
@@ -32,11 +33,12 @@ const All = () => ({
     },
 });
 const ById = () => ({
-    type: Role,
+    type: Model,
     args: { roleId: { type: GraphQLNonNull(GraphQLID) } },
     resolve: async (input, args) => {
         const query = `SELECT roleId, display, description 
-                FROM wwi.role WHERE roleId =  $1`;
+                FROM wwi.role WHERE roleId =  $1
+                ORDER BY display`;
 
         const values = [args.roleId];
 
@@ -48,7 +50,7 @@ const ById = () => ({
 });
 
 const Add = () => ({
-    type: Role,
+    type: Model,
     args: {
         display: { type: GraphQLNonNull(GraphQLString) },
         description: { type: GraphQLNonNull(GraphQLString) },
@@ -67,7 +69,7 @@ const Add = () => ({
 });
 
 const Update = () => ({
-    type: Role,
+    type: Model,
     args: {
         roleId: { type: GraphQLNonNull(GraphQLInt) },
         display: { type: GraphQLNonNull(GraphQLString) },
@@ -88,7 +90,7 @@ const Update = () => ({
 });
 
 const Delete = () => ({
-    type: Role,
+    type: Model,
     args: {
         roleId: { type: GraphQLNonNull(GraphQLInt) },
     },
@@ -106,7 +108,7 @@ const Delete = () => ({
 });
 
 exports.RoleType = {
-    model: Role,
+    model: Model,
     query: {
         all: All,
         one: ById,
