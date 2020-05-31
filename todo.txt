@@ -1,0 +1,19 @@
+create mutaion resolver
+    1.  add roleType mutations to resolver
+    2.  add accountType mutations to resolver
+create query resolver
+    1.  add roleType queries to resolver
+    2.  add accountType queries to resolver
+create roleType
+    1.  create model
+    2.  create query actions
+    3.  create mutation actions
+create AccountType
+    1.  create model
+    2.  create query actions
+    3.  create mutation actions
+create PG Adapter
+    1.  create .env file
+Create index file
+    1.  Add Express
+        a. create app scaffoling
