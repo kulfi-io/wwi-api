@@ -1,11 +1,6 @@
-const { db } = require("../pg-adapter");
 const {
     GraphQLObjectType,
-    GraphQLInt,
-    GraphQLList,
-    GraphQLNonNull,
     GraphQLString,
-    GraphQLID,
 } = require("graphql");
 const {AccountType} = require("../types/account-type");
 const { RoleType } = require("../types/role-type");
