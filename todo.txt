@@ -1,4 +1,7 @@
-create mutaion resolver
+add server middleware
+
+
+create mutation resolver
     1.  add roleType mutations to resolver
     2.  add accountType mutations to resolver
 create query resolver

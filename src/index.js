@@ -1,13 +1,12 @@
-const express = require("express");
-const graphQl = require('graphql');
-const expressGraphQl = require('express-graphql');
-const { GraphQLSchema } = graphQl;
-const { query } = require('./resolvers/query-resolver');
-const { mutation } = require('./resolvers/mutation-resolver');
+import express from "express";
+import expressGraphQl from "express-graphql";
+import graphql from 'graphql';
+import { Query } from "./resolvers/query-resolver.js";
+import Mutation from "./resolvers/mutation-resolver.js";
 
-const schema = new GraphQLSchema({
-    query,
-    mutation
+const schema = new graphql.GraphQLSchema({
+    query: Query,
+    mutation: Mutation
 });
 
 const app = express();
@@ -16,7 +15,7 @@ app.use(
     "/api",
     expressGraphQl({
         schema: schema,
-        graphiql: true
+        graphiql: true,
     })
 );
 

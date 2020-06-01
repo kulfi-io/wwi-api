@@ -1,11 +1,10 @@
-const {
-    GraphQLObjectType,
-    GraphQLString,
-} = require("graphql");
-const {AccountType} = require("../types/account-type");
-const { RoleType } = require("../types/role-type");
+import graphql from 'graphql';
+import AccountType  from '../types/account-type.js';
+import RoleType from "../types/role-type.js";
 
-const Query = new GraphQLObjectType({
+const {GraphQLObjectType, GraphQLString} = graphql;
+
+export const Query = new GraphQLObjectType({
     name: "RootQuery",
     type: "Query",
     fields: () => ({
@@ -13,11 +12,13 @@ const Query = new GraphQLObjectType({
             type: GraphQLString,
             resolve: () => "I am alive!",
         },
-        accounts: AccountType.query.all(),
-        account: AccountType.query.one(),
-        roles: RoleType.query.all(),
-        role: RoleType.query.one()
-    })
+        accounts: AccountType.queries.all(),
+        account: AccountType.queries.byId(),
+        roles: RoleType.queries.all(),
+        role: RoleType.queries.byId()
+        
+    }),
 });
 
-exports.query = Query;
+export default Query;
+

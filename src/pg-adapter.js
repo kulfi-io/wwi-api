@@ -1,6 +1,7 @@
-require('dotenv').config();
-const pgPromise = require('pg-promise');
+import env from "dotenv";
+import pgPromise from "pg-promise";
 
+env.config();
 const pgp = pgPromise({});
 
 const config = {
@@ -8,9 +9,9 @@ const config = {
     port: process.env.POSTGRES_PORT,
     database: process.env.POSTGRES_DB,
     user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD
+    password: process.env.POSTGRES_PASSWORD,
 };
 
-const db = pgp(config);
+export const db = pgp(config);
 
-exports.db = db;
+export default db;
