@@ -13,6 +13,7 @@ export const Query = new GraphQLObjectType({
             resolve: () => "I am alive!",
         },
         accounts: AccountType.queries.all(),
+        accountSearch: AccountType.queries.search(),
         account: AccountType.queries.byId(),
         roles: RoleType.queries.all(),
         role: RoleType.queries.byId()

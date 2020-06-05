@@ -65,7 +65,7 @@ export class RoleType {
             },
             resolve: async (input, args) => {
                 const query = `INSERT INTO wwi.role(display, description) 
-                VALUES($1, $2) RETURNING roleId`;
+                VALUES($1, $2) RETURNING roleid`;
     
                 const values = [args.display, args.description];
     
@@ -86,7 +86,7 @@ export class RoleType {
             resolve: async (input, args) => {
                 const query = `UPDATE wwi.role 
                 SET display = $1, description = $2 
-                WHERE roleId = $3`;
+                WHERE roleid = $3 RETURNING display`;
     
                 const values = [args.display, args.description, args.roleId];
     
@@ -100,13 +100,13 @@ export class RoleType {
         delete: () => ({
             type: this.model,
             args: {
-                roleId: { type: GraphQLNonNull(GraphQLInt) },
+                roleId: { type: GraphQLNonNull(GraphQLInt) }
             },
             resolve: async (input, args) => {
-                const query = `DELETE FROM wwi.account 
-                WHERE accountId = $1`;
+                const query = `DELETE FROM wwi.role 
+                WHERE roleid = $1`;
     
-                const values = [args.accountId];
+                const values = [args.roleId];
     
                 return db
                     .oneOrNone(query, values)

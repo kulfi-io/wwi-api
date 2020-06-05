@@ -15,7 +15,7 @@ app.use(
     "/api",
     expressGraphQl({
         schema: schema,
-        graphiql: true,
+        graphiql: false,
     })
 );
 
@@ -23,6 +23,9 @@ app.get("/", (req, res) => {
     res.send("Express is working!");
 });
 
-app.listen(4000, () => {
+const server = app.listen(4000, () => {
     console.log("Listening on port 4000");
 });
+
+
+export default server;
