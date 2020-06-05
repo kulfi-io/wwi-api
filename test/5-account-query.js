@@ -39,4 +39,19 @@ describe("Account Query", () => {
             expect(admin.role.display).equal("Admin User");
         });
     });
+
+    describe("Account Search", () => {
+        it("returns by search critera", async () => {
+            const search = `query {
+                accountSearch(criteria: "min") {accountid firstname lastname email verified role {display}}
+              }`;
+
+            const res = await request(app).get("/api").send({ query: search });
+
+            const data = JSON.parse(res.text).data.accountSearch;
+
+            expect(res.status).equal(200);
+            expect(data).to.be.an("array");
+        });
+    });
 });
