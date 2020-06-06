@@ -15,6 +15,7 @@ export const Query = new GraphQLObjectType({
         accounts: AccountType.queries.all(),
         accountSearch: AccountType.queries.search(),
         account: AccountType.queries.byId(),
+        login: AccountType.queries.login(),
         roles: RoleType.queries.all(),
         role: RoleType.queries.byId()
         

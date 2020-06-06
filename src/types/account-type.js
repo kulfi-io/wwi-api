@@ -13,6 +13,7 @@ const {
     GraphQLBoolean,
 } = graphql;
 
+const salt = 10;
 
 export class AccountType {
     model = new GraphQLObjectType({
@@ -23,11 +24,25 @@ export class AccountType {
             firstname: { type: GraphQLString },
             lastname: { type: GraphQLString },
             email: { type: GraphQLString },
-            password: {type: GraphQLString},
+            password: { type: GraphQLString },
             verified: { type: GraphQLBoolean },
             role: {
                 type: RoleType.model,
             },
+        },
+    });
+
+    loginModel = new GraphQLObjectType({
+        name: "Login",
+        type: "Query",
+        fields: {
+            accountid: { type: GraphQLInt },
+            firstname: { type: GraphQLString },
+            email: { type: GraphQLString },
+            fullname: { type: GraphQLString },
+            verified: { type: GraphQLBoolean },
+            role: { type: RoleType.model },
+            message: { type: GraphQLString },
         },
     });
 
@@ -84,7 +99,6 @@ export class AccountType {
                 return db
                     .any(query, values)
                     .then((res) => {
-                        
                         let result = [];
 
                         res.forEach((item) => {
@@ -148,6 +162,79 @@ export class AccountType {
                     .catch((err) => err);
             },
         }),
+
+        login: () => ({
+            type: this.loginModel,
+            args: {
+                email: { type: GraphQLNonNull(GraphQLString) },
+                password: { type: GraphQLNonNull(GraphQLString) },
+            },
+            resolve: async (input, args) => {
+                const query = `SELECT a.accountId, a.firstName, a.lastName, a.email, a.verified, a.password, r.roleid, r.display, r.description
+                FROM wwi.account a INNER JOIN wwi.role r
+                ON a.roleId = r.roleId
+                WHERE a.email =  $1`;
+
+                const values = [args.email];
+
+                return db
+                    .one(query, values)
+                    .then((res) => {
+                        if (res !== null) {
+                            let result;
+                            const same = bcrypt.compareSync(
+                                args.password,
+                                res.password
+                            );
+
+                            if (!res.verified) {
+                                result = {
+                                    accountid: res.accountid,
+                                    firstname: res.firstname,
+                                    fullname: `${res.firstname} ${res.lastname}`,
+                                    verified: res.verified,
+                                    role: {
+                                        roleid: res.roleid,
+                                        display: res.display,
+                                    },
+                                    message: "verification required",
+                                };
+
+                                return result;
+                            }
+
+                            if (same) {
+                                result = {
+                                    accountid: res.accountid,
+                                    firstname: res.firstname,
+                                    fullname: `${res.firstname} ${res.lastname}`,
+                                    verified: res.verified,
+                                    role: {
+                                        roleid: res.roleid,
+                                        display: res.display,
+                                        description: res.description,
+                                    },
+                                };
+
+                                return result;
+                            } else {
+                                result = {
+                                    accountid: null,
+                                    firstname: null,
+                                    lastname: null,
+                                    fullname: null,
+                                    verified: null,
+                                    role: null,
+                                    message: "password or email is incorrect",
+                                };
+
+                                return result;
+                            }
+                        } else return res;
+                    })
+                    .catch((err) => err);
+            },
+        }),
     };
 
     mutations = {
@@ -157,14 +244,13 @@ export class AccountType {
                 firstName: { type: GraphQLNonNull(GraphQLString) },
                 lastName: { type: GraphQLNonNull(GraphQLString) },
                 email: { type: GraphQLNonNull(GraphQLString) },
-                password: {type: GraphQLNonNull(GraphQLString)},
+                password: { type: GraphQLNonNull(GraphQLString) },
                 roleId: { type: GraphQLNonNull(GraphQLInt) },
             },
             resolve: async (input, args) => {
-
                 const query = `INSERT INTO wwi.account(firstName, lastName, email, password, roleId) 
                 VALUES($1, $2, $3, $4, $5) RETURNING accountId`;
-                const salt = 10;
+
                 const values = [
                     args.firstName,
                     args.lastName,
@@ -172,7 +258,7 @@ export class AccountType {
                     bcrypt.hashSync(args.password, salt),
                     args.roleId,
                 ];
-                
+
                 return db
                     .oneOrNone(query, values)
                     .then((res) => res)
@@ -199,9 +285,9 @@ export class AccountType {
                     args.lastName,
                     args.email,
                     args.roleId,
-                    args.accountId
+                    args.accountId,
                 ];
-                
+
                 return db
                     .oneOrNone(query, values)
                     .then((res) => res)
