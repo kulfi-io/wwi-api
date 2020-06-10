@@ -1,6 +1,7 @@
 import graphql from 'graphql';
 import AccountType  from '../types/account-type.js';
 import RoleType from "../types/role-type.js";
+import ClaimType from "../types/claim-type.js";
 
 const {GraphQLObjectType, GraphQLString} = graphql;
 
@@ -17,8 +18,9 @@ export const Query = new GraphQLObjectType({
         account: AccountType.queries.byId(),
         login: AccountType.queries.login(),
         roles: RoleType.queries.all(),
-        role: RoleType.queries.byId()
-        
+        role: RoleType.queries.byId(),
+        claims: ClaimType.queries.all(),
+        claim: ClaimType.queries.byId()
     }),
 });
 
