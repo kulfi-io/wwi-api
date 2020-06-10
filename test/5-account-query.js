@@ -41,7 +41,7 @@ describe("Account Query", () => {
     });
 
     describe("Account Search", () => {
-        it("returns by search critera", async () => {
+        it("returns by search criteria", async () => {
             const search = `query {
                 accountSearch(criteria: "min") {accountid firstname lastname email verified role {display}}
               }`;
@@ -52,6 +52,25 @@ describe("Account Query", () => {
 
             expect(res.status).equal(200);
             expect(data).to.be.an("array");
+        });
+    });
+
+    describe("Login", () => {
+        const loginUser = {
+            email: "admin@test.com",
+            password: "admin"
+        }
+
+        it("returns login info for verified user", async () => {
+            const login = `query {
+                login(email: "${loginUser.email}", password: "${loginUser.password}") {accountid firstname fullname email verified role {display} message}
+              }`;
+
+            const res = await request(app).get("/api").send({ query: login });
+
+            const data = JSON.parse(res.text).data.login;
+
+            expect(res.status).equal(200);
         });
     });
 });

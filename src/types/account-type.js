@@ -192,6 +192,7 @@ export class AccountType {
                                     accountid: res.accountid,
                                     firstname: res.firstname,
                                     fullname: `${res.firstname} ${res.lastname}`,
+                                    email: res.email,
                                     verified: res.verified,
                                     role: {
                                         roleid: res.roleid,
@@ -208,6 +209,7 @@ export class AccountType {
                                     accountid: res.accountid,
                                     firstname: res.firstname,
                                     fullname: `${res.firstname} ${res.lastname}`,
+                                    email: res.email,
                                     verified: res.verified,
                                     role: {
                                         roleid: res.roleid,
@@ -221,11 +223,11 @@ export class AccountType {
                                 result = {
                                     accountid: null,
                                     firstname: null,
-                                    lastname: null,
                                     fullname: null,
+                                    email: null,
                                     verified: null,
                                     role: null,
-                                    message: "password or email is incorrect",
+                                    message: "Unauthenticated",
                                 };
 
                                 return result;
