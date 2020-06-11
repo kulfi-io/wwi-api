@@ -9,7 +9,7 @@ const salt = 10;
 describe("Database", () => {
     describe("Clean role and account", () => {
         it("clean", () => {
-            const truncate = `TRUNCATE wwi.account, wwi.role 
+            const truncate = `TRUNCATE wwi.account, wwi.role_claim, wwi.role, wwi.claim 
             RESTART IDENTITY`;
 
             db.query(truncate)

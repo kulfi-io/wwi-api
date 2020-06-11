@@ -16,7 +16,7 @@ export class RoleType {
         name: "Role",
         type: "Query",
         fields: {
-            roleid: { type: GraphQLInt },
+            id: { type: GraphQLInt },
             display: { type: GraphQLString },
             description: { type: GraphQLString },
         },
@@ -26,7 +26,7 @@ export class RoleType {
         all: () => ({
             type: new GraphQLList(this.model),
             resolve: async (input) => {
-                const query = `SELECT r.roleId, r.display, r.description 
+                const query = `SELECT r.id, r.display, r.description 
                         FROM wwi.role r 
                         ORDER BY r.display`;
     
@@ -39,13 +39,13 @@ export class RoleType {
     
         byId: () => ({
             type: this.model,
-            args: { roleId: { type: GraphQLNonNull(GraphQLID) } },
+            args: { id: { type: GraphQLNonNull(GraphQLID) } },
             resolve: async (input, args) => {
-                const query = `SELECT roleId, display, description 
-                        FROM wwi.role WHERE roleId =  $1
+                const query = `SELECT id, display, description 
+                        FROM wwi.role WHERE id =  $1
                         ORDER BY display`;
     
-                const values = [args.roleId];
+                const values = [args.id];
     
                 return db
                     .one(query, values)
@@ -65,7 +65,7 @@ export class RoleType {
             },
             resolve: async (input, args) => {
                 const query = `INSERT INTO wwi.role(display, description) 
-                VALUES($1, $2) RETURNING roleid`;
+                VALUES($1, $2) RETURNING id`;
     
                 const values = [args.display, args.description];
     
@@ -79,16 +79,16 @@ export class RoleType {
         update: () => ({
             type: this.model,
             args: {
-                roleId: { type: GraphQLNonNull(GraphQLInt) },
+                id: { type: GraphQLNonNull(GraphQLInt) },
                 display: { type: GraphQLNonNull(GraphQLString) },
                 description: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve: async (input, args) => {
                 const query = `UPDATE wwi.role 
                 SET display = $1, description = $2 
-                WHERE roleid = $3 RETURNING display`;
+                WHERE id = $3 RETURNING display`;
     
-                const values = [args.display, args.description, args.roleId];
+                const values = [args.display, args.description, args.id];
     
                 return db
                     .oneOrNone(query, values)
@@ -100,13 +100,13 @@ export class RoleType {
         delete: () => ({
             type: this.model,
             args: {
-                roleId: { type: GraphQLNonNull(GraphQLInt) }
+                id: { type: GraphQLNonNull(GraphQLInt) }
             },
             resolve: async (input, args) => {
                 const query = `DELETE FROM wwi.role 
-                WHERE roleid = $1`;
+                WHERE id = $1`;
     
-                const values = [args.roleId];
+                const values = [args.id];
     
                 return db
                     .oneOrNone(query, values)

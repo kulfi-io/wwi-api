@@ -14,8 +14,6 @@ export const Mutation = new graphql.GraphQLObjectType({
         updateRole: RoleType.mutations.update(),
         deleteRole: RoleType.mutations.delete(),
         addClaim: ClaimType.mutations.add(),
-        updateClaim: ClaimType.mutations.update(),
-        deleteClaim: ClaimType.mutations.delete()
     }),
 });
 

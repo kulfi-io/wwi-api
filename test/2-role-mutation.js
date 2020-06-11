@@ -6,6 +6,8 @@ import app from "../src/index.js";
 const { describe, it } = mocha;
 const { expect } = chai;
 
+
+
 describe("Role Mutations", () => {
     const basic = {
         display: "Basic User",
@@ -24,15 +26,15 @@ describe("Role Mutations", () => {
 
     describe("Add", async () => {
         const addBasic = `mutation { addRole(display: "${basic.display}", description: "${basic.description}")
-            {roleid}
+            {id}
         }`;
 
         const addAdmin = `mutation { addRole(display: "${admin.display}", description: "${admin.description}")
-            {roleid}
+            {id}
         }`;
 
         const addDemo = `mutation { addRole(display: "${demo.display}", description: "${demo.description}")
-            {roleid}
+            {id}
         }`;
 
         let res, data;
@@ -48,7 +50,7 @@ describe("Role Mutations", () => {
         
                     data = JSON.parse(res.text).data.addRole;
                     expect(res.status).equal(200);
-                    expect(data.roleid).equal(1);
+                    expect(data.id).equal(1);
 
                     resolve();
                 });
@@ -67,7 +69,7 @@ describe("Role Mutations", () => {
         
                     data = JSON.parse(res.text).data.addRole;
                     expect(res.status).equal(200);
-                    expect(data.roleid).equal(2);
+                    expect(data.id).equal(2);
 
                     resolve();
                 });
@@ -86,7 +88,7 @@ describe("Role Mutations", () => {
         
                     data = JSON.parse(res.text).data.addRole;
                     expect(res.status).equal(200);
-                    expect(data.roleid).equal(3);
+                    expect(data.id).equal(3);
 
                     resolve();
                 });
@@ -99,7 +101,7 @@ describe("Role Mutations", () => {
     });
 
     describe("Update", async () => {
-        const update = `mutation { updateRole(roleId: 1, display: "${basic.display} - updated", description: "${basic.description}")
+        const update = `mutation { updateRole(id: 1, display: "${basic.display} - updated", description: "${basic.description}")
             {display}
         }`;
 
@@ -113,7 +115,7 @@ describe("Role Mutations", () => {
     });
 
     describe("Delete", async () => {
-        const query = `mutation { deleteRole(roleId: 3) {roleid} }`;
+        const query = `mutation { deleteRole(id: 3) {id} }`;
 
         it("Delete demo role", async () => {
             const res = await request(app).post("/api").send({ query: query });

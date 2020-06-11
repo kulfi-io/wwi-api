@@ -10,7 +10,7 @@ describe("Role Query", () => {
     describe("Role", () => {
         it("returns admin role", async () => {
             const byId = `query {
-                role(roleId: 2){roleid display description}
+                role(id: 2){id display description}
               }`;
 
             const res = await request(app).get("/api").send({ query: byId });
@@ -24,14 +24,14 @@ describe("Role Query", () => {
     describe("Roles", () => {
         it("returns all roles", async () => {
             const byId = `query {
-                roles {roleid display description}
+                roles {id display description}
               }`;
 
             const res = await request(app).get("/api").send({ query: byId });
 
             const data = JSON.parse(res.text).data.roles;
-            const admin = data.filter(x => x.roleid == 2)[0];
-            const basic = data.filter(x => x.roleid == 1)[0];
+            const admin = data.filter(x => x.id == 2)[0];
+            const basic = data.filter(x => x.id == 1)[0];
 
             expect(res.status).equal(200);
             expect(data).to.be.an("array")

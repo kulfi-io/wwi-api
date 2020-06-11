@@ -20,7 +20,7 @@ export class AccountType {
         name: "Account",
         type: "Query",
         fields: {
-            accountid: { type: GraphQLInt },
+            id: { type: GraphQLInt },
             firstname: { type: GraphQLString },
             lastname: { type: GraphQLString },
             email: { type: GraphQLString },
@@ -36,7 +36,7 @@ export class AccountType {
         name: "Login",
         type: "Query",
         fields: {
-            accountid: { type: GraphQLInt },
+            id: { type: GraphQLInt },
             firstname: { type: GraphQLString },
             email: { type: GraphQLString },
             fullname: { type: GraphQLString },
@@ -50,11 +50,11 @@ export class AccountType {
         all: () => ({
             type: new GraphQLList(this.model),
             resolve: async (input) => {
-                const query = `SELECT a.accountId, a.firstName, a.lastName,
-                a.email, a.verified, r.roleId, r.display, r.description
+                const query = `SELECT a.id, a.firstname, a.lastname,
+                a.email, a.verified, a.roleid, r.display, r.description
                 FROM wwi.account a INNER JOIN wwi.role r
-                ON a.roleId = r.roleId 
-                ORDER BY a.firstName`;
+                ON a.roleid = r.id 
+                ORDER BY a.firstname`;
 
                 return db
                     .any(query)
@@ -63,13 +63,13 @@ export class AccountType {
 
                         res.forEach((item) => {
                             const _item = {
-                                accountid: item.accountid,
+                                id: item.id,
                                 firstname: item.firstname,
                                 lastname: item.lastname,
                                 email: item.email,
                                 verified: item.verified,
                                 role: {
-                                    roleid: item.roleid,
+                                    id: item.roleid,
                                     display: item.display,
                                     description: item.description,
                                 },
@@ -88,9 +88,9 @@ export class AccountType {
             type: new GraphQLList(this.model),
             args: { criteria: { type: GraphQLNonNull(GraphQLString) } },
             resolve: async (input, args) => {
-                const query = `SELECT a.accountId, a.firstName, a.lastName, a.email, a.verified, r.roleId, r.display, r.description
+                const query = `SELECT a.id, a.firstName, a.lastName, a.email, a.verified, a.roleId, r.display, r.description
                 FROM wwi.account a INNER JOIN wwi.role r
-                ON a.roleId = r.roleId 
+                ON a.roleId = r.id 
                 WHERE a.firstName LIKE $1 OR a.lastName LIKE $1 OR a.email LIKE $1
                 ORDER BY a.firstName`;
 
@@ -103,13 +103,13 @@ export class AccountType {
 
                         res.forEach((item) => {
                             const _item = {
-                                accountid: item.accountid,
+                                id: item.id,
                                 firstname: item.firstname,
                                 lastname: item.lastname,
                                 email: item.email,
                                 verified: item.verified,
                                 role: {
-                                    roleid: item.roleid,
+                                    id: item.roleid,
                                     display: item.display,
                                     description: item.description,
                                 },
@@ -126,29 +126,29 @@ export class AccountType {
 
         byId: () => ({
             type: this.model,
-            args: { accountId: { type: GraphQLNonNull(GraphQLID) } },
+            args: { id: { type: GraphQLNonNull(GraphQLID) } },
             resolve: async (input, args) => {
-                const query = `SELECT a.accountId, a.firstName, a.lastName,
-                a.email, a.verified, r.roleId, r.display, r.description
+                const query = `SELECT a.id, a.firstname, a.lastname,
+                a.email, a.verified, a.roleId, r.display, r.description
                 FROM wwi.account a INNER JOIN wwi.role r
-                ON a.roleId = r.roleId
-                WHERE accountId =  $1 
-                ORDER BY a.firstName`;
+                ON a.roleId = r.id
+                WHERE a.id =  $1 
+                ORDER BY a.firstname`;
 
-                const values = [args.accountId];
+                const values = [args.id];
 
                 return db
                     .one(query, values)
                     .then((res) => {
                         if (res) {
                             const result = {
-                                accountid: res.accountid,
+                                id: res.id,
                                 firstname: res.firstname,
                                 lastname: res.lastname,
                                 email: res.email,
                                 verified: res.verified,
                                 role: {
-                                    roleid: res.roleid,
+                                    id: res.roleid,
                                     display: res.display,
                                     description: res.description,
                                 },
@@ -170,9 +170,9 @@ export class AccountType {
                 password: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve: async (input, args) => {
-                const query = `SELECT a.accountId, a.firstName, a.lastName, a.email, a.verified, a.password, r.roleid, r.display, r.description
+                const query = `SELECT a.id, a.firstname, a.lastname, a.email, a.verified, a.password, a.roleid, r.display, r.description
                 FROM wwi.account a INNER JOIN wwi.role r
-                ON a.roleId = r.roleId
+                ON a.roleId = r.id
                 WHERE a.email =  $1`;
 
                 const values = [args.email];
@@ -189,13 +189,13 @@ export class AccountType {
 
                             if (!res.verified) {
                                 result = {
-                                    accountid: res.accountid,
+                                    id: res.id,
                                     firstname: res.firstname,
                                     fullname: `${res.firstname} ${res.lastname}`,
                                     email: res.email,
                                     verified: res.verified,
                                     role: {
-                                        roleid: res.roleid,
+                                        id: res.roleid,
                                         display: res.display,
                                     },
                                     message: "verification required",
@@ -206,13 +206,13 @@ export class AccountType {
 
                             if (same) {
                                 result = {
-                                    accountid: res.accountid,
+                                    id: res.id,
                                     firstname: res.firstname,
                                     fullname: `${res.firstname} ${res.lastname}`,
                                     email: res.email,
                                     verified: res.verified,
                                     role: {
-                                        roleid: res.roleid,
+                                        id: res.roleid,
                                         display: res.display,
                                         description: res.description,
                                     },
@@ -243,22 +243,26 @@ export class AccountType {
         add: () => ({
             type: this.model,
             args: {
-                firstName: { type: GraphQLNonNull(GraphQLString) },
-                lastName: { type: GraphQLNonNull(GraphQLString) },
+                firstname: { type: GraphQLNonNull(GraphQLString) },
+                lastname: { type: GraphQLNonNull(GraphQLString) },
                 email: { type: GraphQLNonNull(GraphQLString) },
                 password: { type: GraphQLNonNull(GraphQLString) },
-                roleId: { type: GraphQLNonNull(GraphQLInt) },
+                roleid: { type: GraphQLNonNull(GraphQLInt) },
             },
             resolve: async (input, args) => {
-                const query = `INSERT INTO wwi.account(firstName, lastName, email, password, roleId) 
-                VALUES($1, $2, $3, $4, $5) RETURNING accountId`;
+                const query = `INSERT INTO wwi.account(firstname, lastname, email, password, roleid) 
+                VALUES($1, $2, $3, $4, $5) RETURNING id`;
+
+                if(!args.firstname || !args.lastname || !args.password || !args.email || !args.roleid) {
+                    throw new Error("Invalid data");
+                }
 
                 const values = [
-                    args.firstName,
-                    args.lastName,
+                    args.firstname,
+                    args.lastname,
                     args.email,
                     bcrypt.hashSync(args.password, salt),
-                    args.roleId,
+                    args.roleid,
                 ];
 
                 return db
@@ -271,23 +275,23 @@ export class AccountType {
         update: () => ({
             type: this.model,
             args: {
-                accountId: { type: GraphQLNonNull(GraphQLInt) },
-                firstName: { type: GraphQLNonNull(GraphQLString) },
-                lastName: { type: GraphQLNonNull(GraphQLString) },
+                id: { type: GraphQLNonNull(GraphQLInt) },
+                firstname: { type: GraphQLNonNull(GraphQLString) },
+                lastname: { type: GraphQLNonNull(GraphQLString) },
                 email: { type: GraphQLNonNull(GraphQLString) },
-                roleId: { type: GraphQLNonNull(GraphQLInt) },
+                roleid: { type: GraphQLNonNull(GraphQLInt) },
             },
             resolve: async (input, args) => {
                 const query = `UPDATE wwi.account 
-                SET firstName = $1, lastName = $2, email = $3, roleId = $4 
-                WHERE accountId = $5 RETURNING firstName`;
+                SET firstname = $1, lastname = $2, email = $3, roleid = $4 
+                WHERE id = $5 RETURNING firstname`;
 
                 const values = [
-                    args.firstName,
-                    args.lastName,
+                    args.firstname,
+                    args.lastname,
                     args.email,
-                    args.roleId,
-                    args.accountId,
+                    args.roleid,
+                    args.id,
                 ];
 
                 return db
@@ -300,13 +304,13 @@ export class AccountType {
         delete: () => ({
             type: this.model,
             args: {
-                accountId: { type: GraphQLNonNull(GraphQLInt) },
+                id: { type: GraphQLNonNull(GraphQLInt) },
             },
             resolve: async (input, args) => {
                 const query = `DELETE FROM wwi.account 
-                WHERE accountId = $1`;
+                WHERE id = $1`;
 
-                const values = [args.accountId];
+                const values = [args.id];
 
                 return db
                     .oneOrNone(query, values)

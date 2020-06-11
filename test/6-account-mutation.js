@@ -3,14 +3,15 @@ import chai from "chai";
 import request from "supertest";
 import app from "../src/index.js";
 
-
 const { describe, it } = mocha;
 const { expect } = chai;
 
+
+
 describe("Account Mutations", () => {
     const basic ={
-        firstName: "Basic",
-        lastName: "Account",
+        firstname: "Basic",
+        lastname: "Account",
         email: "basic@test.com",
         password: "basic",
         roleId: 1
@@ -18,16 +19,16 @@ describe("Account Mutations", () => {
     };
 
     const admin = {
-        firstName: "Admin",
-        lastName: "Account",
+        firstname: "Admin",
+        lastname: "Account",
         email: "admin@test.com",
         password: "admin",
         roleId: 2
     };
 
     const demo = {
-        firstName: "Demo",
-        lastName: "Account",
+        firstname: "Demo",
+        lastname: "Account",
         email: "demo@test.com",
         password: "demo",
         roleId: 1
@@ -36,16 +37,16 @@ describe("Account Mutations", () => {
    
 
     describe("Add", async () => {
-        const addBasic = `mutation { addAccount(firstName: "${basic.firstName}", lastName: "${basic.lastName}", email: "${basic.email}", password: "${basic.password}", roleId: ${basic.roleId})
-            {accountid}
+        const addBasic = `mutation { addAccount(firstname: "${basic.firstname}", lastname: "${basic.lastname}", email: "${basic.email}", password: "${basic.password}", roleid: ${basic.roleId})
+            {id}
         }`;
 
-        const addAdmin = `mutation { addAccount(firstName: "${admin.firstName}", lastName: "${admin.lastName}", email: "${admin.email}", password: "${admin.password}", roleId: ${admin.roleId})
-            {accountid}
+        const addAdmin = `mutation { addAccount(firstname: "${admin.firstname}", lastname: "${admin.lastname}", email: "${admin.email}", password: "${admin.password}", roleid: ${admin.roleId})
+            {id}
         }`;
 
-        const addDemo = `mutation { addAccount(firstName: "${demo.firstName}", lastName: "${demo.lastName}", email: "${demo.email}", password: "${demo.password}", roleId: ${demo.roleId})
-            {accountid}
+        const addDemo = `mutation { addAccount(firstname: "${demo.firstname}", lastname: "${demo.lastname}", email: "${demo.email}", password: "${demo.password}", roleid: ${demo.roleId})
+            {id}
         }`;
 
         let res, data;
@@ -62,7 +63,7 @@ describe("Account Mutations", () => {
         
                     data = JSON.parse(res.text).data.addAccount;
                     expect(res.status).equal(200);
-                    expect(data.accountid).equal(1);
+                    expect(data.id).equal(1);
 
                     resolve();
                 });
@@ -82,7 +83,7 @@ describe("Account Mutations", () => {
         
                     data = JSON.parse(res.text).data.addAccount;
                     expect(res.status).equal(200);
-                    expect(data.accountid).equal(2);
+                    expect(data.id).equal(2);
 
                     resolve();
                 });
@@ -101,7 +102,7 @@ describe("Account Mutations", () => {
         
                     data = JSON.parse(res.text).data.addAccount;
                     expect(res.status).equal(200);
-                    expect(data.accountid).equal(3);
+                    expect(data.id).equal(3);
 
                     resolve();
                 });
@@ -114,7 +115,7 @@ describe("Account Mutations", () => {
     });
 
     describe("Update", async () => {
-        const update = `mutation { updateAccount(accountId: 1, firstName: "${basic.firstName} - updated", lastName: "${basic.lastName}", email: "${basic.email}", roleId: ${basic.roleId})
+        const update = `mutation { updateAccount(id: 1, firstname: "${basic.firstname} - updated", lastname: "${basic.lastname}", email: "${basic.email}", roleid: ${basic.roleId})
             {firstname}
         }`;
 
@@ -123,12 +124,12 @@ describe("Account Mutations", () => {
 
             const data = JSON.parse(res.text).data.updateAccount;
             expect(res.status).equal(200);
-            expect(data.firstname).equal(`${basic.firstName} - updated`);
+            expect(data.firstname).equal(`${basic.firstname} - updated`);
         });
     });
 
     describe("Delete", async () => {
-        const query = `mutation { deleteAccount(accountId: 3) {accountid} }`;
+        const query = `mutation { deleteAccount(id: 3) {id} }`;
 
         it("Delete demo account", async () => {
             const res = await request(app).post("/api").send({ query: query });
