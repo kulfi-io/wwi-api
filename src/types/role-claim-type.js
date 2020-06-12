@@ -72,7 +72,7 @@ export class RoleClaimType {
                 const query = `INSERT INTO wwi.role_claim(roleid, claimid) 
                 VALUES($1, $2) RETURNING id`;
     
-                const values = [args.display, args.description];
+                const values = [args.roleid, args.claimid];
     
                 return db
                     .oneOrNone(query, values)

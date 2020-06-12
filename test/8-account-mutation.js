@@ -53,7 +53,7 @@ describe("Account Mutations", () => {
 
         const insertBasic = () => {
             return new Promise((resolve, reject) => {
-                it("adds basic user", async () => {
+                it("adds basic account", async () => {
                     res = await request(app)
                         .post("/api")
                         .send({ query: addBasic });
@@ -73,7 +73,7 @@ describe("Account Mutations", () => {
 
         const insertAdmin = () => {
             return new Promise((resolve, reject) => {
-                it("adds admin user", async () => {
+                it("adds admin account", async () => {
                     res = await request(app)
                         .post("/api")
                         .send({ query: addAdmin });
@@ -93,7 +93,7 @@ describe("Account Mutations", () => {
 
         const insertDemo = () => {
             return new Promise((resolve, reject) => {
-                it("adds demo user", async () => {
+                it("adds demo account", async () => {
                     res = await request(app)
                         .post("/api")
                         .send({ query: addDemo });
