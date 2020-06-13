@@ -2,11 +2,12 @@ import mocha from "mocha";
 import chai from "chai";
 import request from "supertest";
 import app from "../src/index.js";
+import { generateSeederToken } from "../src/util/index.js";
 
 const { describe, it } = mocha;
 const { expect } = chai;
 
-
+const _token = generateSeederToken();
 
 describe("Role Mutations", () => {
     const basic = {
@@ -44,18 +45,18 @@ describe("Role Mutations", () => {
                 it("adds basic role", async () => {
                     res = await request(app)
                         .post("/api")
+                        .set({ Authorization: _token })
                         .send({ query: addBasic });
 
-                    if(res.err) reject();
-        
+                    if (res.err) reject();
+
                     data = JSON.parse(res.text).data.addRole;
                     expect(res.status).equal(200);
                     expect(data.id).equal(1);
 
                     resolve();
                 });
-
-            });            
+            });
         };
 
         const insertAdmin = () => {
@@ -63,18 +64,18 @@ describe("Role Mutations", () => {
                 it("adds admin role", async () => {
                     res = await request(app)
                         .post("/api")
+                        .set({ Authorization: _token })
                         .send({ query: addAdmin });
 
-                    if(res.err) reject();
-        
+                    if (res.err) reject();
+
                     data = JSON.parse(res.text).data.addRole;
                     expect(res.status).equal(200);
                     expect(data.id).equal(2);
 
                     resolve();
                 });
-
-            });            
+            });
         };
 
         const insertDemo = () => {
@@ -82,22 +83,21 @@ describe("Role Mutations", () => {
                 it("adds demo role", async () => {
                     res = await request(app)
                         .post("/api")
+                        .set({ Authorization: _token })
                         .send({ query: addDemo });
 
-                    if(res.err) reject();
-        
+                    if (res.err) reject();
+
                     data = JSON.parse(res.text).data.addRole;
                     expect(res.status).equal(200);
                     expect(data.id).equal(3);
 
                     resolve();
                 });
-
-            });            
+            });
         };
 
         insertBasic().then(insertAdmin()).then(insertDemo());
-
     });
 
     describe("Update", async () => {
@@ -106,7 +106,10 @@ describe("Role Mutations", () => {
         }`;
 
         it("Updates basic role", async () => {
-            const res = await request(app).post("/api").send({ query: update });
+            const res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: update });
 
             const data = JSON.parse(res.text).data.updateRole;
             expect(res.status).equal(200);
@@ -118,13 +121,19 @@ describe("Role Mutations", () => {
         const query = `mutation { deleteRole(id: 3) {id} }`;
 
         it("Delete demo role", async () => {
-            const res = await request(app).post("/api").send({ query: query });
+            const res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: query });
 
             expect(res.status).equal(200);
         });
 
         it("Delete with invalid id generates error", async () => {
-            const res = await request(app).post("/api").send({ query: query });
+            const res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: query });
 
             expect(res.error);
         });

@@ -2,11 +2,12 @@ import mocha from "mocha";
 import chai from "chai";
 import request from "supertest";
 import app from "../src/index.js";
+import { generateSeederToken } from "../src/util/index.js";
 
 const { describe, it } = mocha;
 const { expect } = chai;
 
-
+const _token = generateSeederToken();
 
 describe("Claim Mutations", () => {
     const view = {
@@ -49,40 +50,47 @@ describe("Claim Mutations", () => {
         let res, data;
 
         it("adds view claim", async () => {
-            res = await request(app).post("/api").send({ query: _view });
+            res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: _view });
 
             data = JSON.parse(res.text).data.addClaim;
             expect(res.status).equal(200);
             expect(data.id).equal(1);
-
         });
 
         it("adds write claim", async () => {
-            res = await request(app).post("/api").send({ query: _add });
+            res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: _add });
 
             data = JSON.parse(res.text).data.addClaim;
             expect(res.status).equal(200);
             expect(data.id).equal(2);
-
         });
 
         it("adds update claim", async () => {
-            res = await request(app).post("/api").send({ query: _update });
+            res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: _update });
 
             data = JSON.parse(res.text).data.addClaim;
             expect(res.status).equal(200);
             expect(data.id).equal(3);
-
         });
 
         it("adds delete claim", async () => {
-            res = await request(app).post("/api").send({ query: _remove });
+            res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: _remove });
 
             data = JSON.parse(res.text).data.addClaim;
             expect(res.status).equal(200);
             expect(data.id).equal(4);
-
         });
     });
-
 });

@@ -2,20 +2,20 @@ import mocha from "mocha";
 import chai from "chai";
 import request from "supertest";
 import app from "../src/index.js";
+import { generateSeederToken } from "../src/util/index.js";
+
+const _token = generateSeederToken();
 
 const { describe, it } = mocha;
 const { expect } = chai;
 
-
-
 describe("Account Mutations", () => {
-    const basic ={
+    const basic = {
         firstname: "Basic",
         lastname: "Account",
         email: "basic@test.com",
         password: "basic",
-        roleId: 1
-
+        roleId: 1,
     };
 
     const admin = {
@@ -23,7 +23,7 @@ describe("Account Mutations", () => {
         lastname: "Account",
         email: "admin@test.com",
         password: "admin",
-        roleId: 2
+        roleId: 2,
     };
 
     const demo = {
@@ -31,10 +31,8 @@ describe("Account Mutations", () => {
         lastname: "Account",
         email: "demo@test.com",
         password: "demo",
-        roleId: 1
+        roleId: 1,
     };
-
-   
 
     describe("Add", async () => {
         const addBasic = `mutation { addAccount(firstname: "${basic.firstname}", lastname: "${basic.lastname}", email: "${basic.email}", password: "${basic.password}", roleid: ${basic.roleId})
@@ -56,19 +54,18 @@ describe("Account Mutations", () => {
                 it("adds basic account", async () => {
                     res = await request(app)
                         .post("/api")
+                        .set({ Authorization: _token })
                         .send({ query: addBasic });
-                    
 
-                    if(res.err) reject();
-        
+                    if (res.err) reject();
+
                     data = JSON.parse(res.text).data.addAccount;
                     expect(res.status).equal(200);
                     expect(data.id).equal(1);
 
                     resolve();
                 });
-
-            });            
+            });
         };
 
         const insertAdmin = () => {
@@ -76,19 +73,18 @@ describe("Account Mutations", () => {
                 it("adds admin account", async () => {
                     res = await request(app)
                         .post("/api")
+                        .set({ Authorization: _token })
                         .send({ query: addAdmin });
 
+                    if (res.err) reject();
 
-                    if(res.err) reject();
-        
                     data = JSON.parse(res.text).data.addAccount;
                     expect(res.status).equal(200);
                     expect(data.id).equal(2);
 
                     resolve();
                 });
-
-            });            
+            });
         };
 
         const insertDemo = () => {
@@ -96,20 +92,19 @@ describe("Account Mutations", () => {
                 it("adds demo account", async () => {
                     res = await request(app)
                         .post("/api")
+                        .set({ Authorization: _token })
                         .send({ query: addDemo });
 
-                    if(res.err) reject();
-        
+                    if (res.err) reject();
+
                     data = JSON.parse(res.text).data.addAccount;
                     expect(res.status).equal(200);
                     expect(data.id).equal(3);
 
                     resolve();
                 });
-
-            });            
+            });
         };
-
 
         insertBasic().then(insertAdmin()).then(insertDemo());
     });
@@ -120,7 +115,10 @@ describe("Account Mutations", () => {
         }`;
 
         it("Updates basic account", async () => {
-            const res = await request(app).post("/api").send({ query: update });
+            const res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: update });
 
             const data = JSON.parse(res.text).data.updateAccount;
             expect(res.status).equal(200);
@@ -134,7 +132,10 @@ describe("Account Mutations", () => {
           }`;
 
         it("set that the account is verified", async () => {
-            const res = await request(app).post("/api").send({ query: update });
+            const res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: update });
 
             const data = JSON.parse(res.text).data.verify;
             expect(res.status).equal(200);
@@ -146,13 +147,19 @@ describe("Account Mutations", () => {
         const query = `mutation { deleteAccount(id: 3) {id} }`;
 
         it("Delete demo account", async () => {
-            const res = await request(app).post("/api").send({ query: query });
+            const res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: query });
 
             expect(res.status).equal(200);
         });
 
         it("Delete with invalid id generates error", async () => {
-            const res = await request(app).post("/api").send({ query: query });
+            const res = await request(app)
+                .post("/api")
+                .set({ Authorization: _token })
+                .send({ query: query });
 
             expect(res.error);
         });

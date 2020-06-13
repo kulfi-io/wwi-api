@@ -2,10 +2,8 @@ import graphql from "graphql";
 import RoleType from "./role-type.js";
 import { db } from "../pg-adapter.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import env from "dotenv";
+import { validateAndGenerateToken, isAuthentic } from "../util/index.js";
 
-env.config();
 const {
     GraphQLObjectType,
     GraphQLInt,
@@ -17,47 +15,6 @@ const {
 } = graphql;
 
 const salt = 10;
-
-
-const validateAndGenerateToken = (args, result) => {
-
-    const _model = {
-        id: -1,
-        fullname: null,
-        token: null,
-        message: null,
-    };
-
-    if(!result) return _model;
-
-    if (!result.verified) {
-        _model.message = "Please verify your registration";
-        return _model;
-    }
-
-    const same = bcrypt.compareSync(args.password, result.password);
-
-    if(!same) {
-        _model.message = "Username password mistmatch";
-        return _model;
-    }
-
-    const _items = result.items;
-    const _email = result.email;
-
-    const token = jwt.sign(
-        {_email, _items},
-        process.env.SECRET,
-        {expiresIn: '1d'}
-    );
-
-    _model.id = result.id;
-    _model.fullname = result.fullname;
-    _model.token = token;
-
-    return _model;
-
-};
 
 export class AccountType {
     model = new GraphQLObjectType({
@@ -76,27 +33,27 @@ export class AccountType {
         },
     });
 
-
     loginModel = new GraphQLObjectType({
         name: "Login",
         type: "Query",
         fields: {
-            id: { type: GraphQLInt },
             fullname: { type: GraphQLString },
             token: { type: GraphQLString },
-            message: { type: GraphQLString },
+            error: { type: GraphQLString },
         },
     });
 
     queries = {
         all: () => ({
             type: new GraphQLList(this.model),
-            resolve: async (input) => {
+            resolve: async (input, args, context) => {
                 const query = `SELECT a.id, a.firstname, a.lastname,
                 a.email, a.verified, a.roleid, r.display, r.description
                 FROM wwi.account a INNER JOIN wwi.role r
                 ON a.roleid = r.id 
                 ORDER BY a.firstname`;
+
+                if (!isAuthentic(context.user)) throw new Error("Unauthorized");
 
                 return db
                     .any(query)
@@ -129,18 +86,21 @@ export class AccountType {
         search: () => ({
             type: new GraphQLList(this.model),
             args: { criteria: { type: GraphQLNonNull(GraphQLString) } },
-            resolve: async (input, args) => {
-                const query = `SELECT a.id, a.firstName, a.lastName, a.email, a.verified, a.roleId, r.display, r.description
+            resolve: async (input, args, context) => {
+                const query = `SELECT a.id, a.firstname, a.lastname, a.email, a.verified, a.roleId, r.display, r.description
                 FROM wwi.account a INNER JOIN wwi.role r
-                ON a.roleId = r.id 
-                WHERE a.firstName LIKE $1 OR a.lastName LIKE $1 OR a.email LIKE $1
-                ORDER BY a.firstName`;
+                ON a.roleid = r.id 
+                WHERE a.firstname LIKE $1 OR a.lastname LIKE $1 OR a.email LIKE $1
+                ORDER BY a.firstname`;
 
                 const values = [`%${args.criteria}%`];
+
+                if (!isAuthentic(context.user)) throw new Error("Unauthorized");
 
                 return db
                     .any(query, values)
                     .then((res) => {
+
                         let result = [];
 
                         res.forEach((item) => {
@@ -169,7 +129,7 @@ export class AccountType {
         byId: () => ({
             type: this.model,
             args: { id: { type: GraphQLNonNull(GraphQLID) } },
-            resolve: async (input, args) => {
+            resolve: async (input, args, context) => {
                 const query = `SELECT a.id, a.firstname, a.lastname,
                 a.email, a.verified, a.roleId, r.display, r.description
                 FROM wwi.account a INNER JOIN wwi.role r
@@ -178,6 +138,8 @@ export class AccountType {
                 ORDER BY a.firstname`;
 
                 const values = [args.id];
+
+                if (!isAuthentic(context.user)) throw new Error("Unauthorized");
 
                 return db
                     .one(query, values)
@@ -212,10 +174,11 @@ export class AccountType {
                 password: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve: async (input, args) => {
-                const query = `SELECT id, concat(firstname, ' ', lastname) as fullname,
-                email, verified, password, wwi.get_account_claims($1) as items 
-                FROM wwi.account 
-                WHERE email = $1`
+                const query = `SELECT a.id, concat(a.firstname, ' ', a.lastname) as fullname,
+                a.email, a.verified, a.password, r.display, wwi.get_account_claims($1) as items 
+                FROM wwi.account a INNER JOIN wwi.role r
+                    ON a.roleid = r.id
+                WHERE email = $1`;
 
                 const values = [args.email];
 
@@ -240,7 +203,7 @@ export class AccountType {
                 password: { type: GraphQLNonNull(GraphQLString) },
                 roleid: { type: GraphQLNonNull(GraphQLInt) },
             },
-            resolve: async (input, args) => {
+            resolve: async (input, args, context) => {
                 const query = `INSERT INTO wwi.account(firstname, lastname, email, password, roleid) 
                 VALUES($1, $2, $3, $4, $5) RETURNING id`;
 
@@ -262,6 +225,8 @@ export class AccountType {
                     args.roleid,
                 ];
 
+                if (!isAuthentic(context.user)) throw new Error("Unauthorized");
+
                 return db
                     .oneOrNone(query, values)
                     .then((res) => res)
@@ -278,7 +243,7 @@ export class AccountType {
                 email: { type: GraphQLNonNull(GraphQLString) },
                 roleid: { type: GraphQLNonNull(GraphQLInt) },
             },
-            resolve: async (input, args) => {
+            resolve: async (input, args, context) => {
                 const query = `UPDATE wwi.account 
                 SET firstname = $1, lastname = $2, email = $3, roleid = $4 
                 WHERE id = $5 RETURNING firstname`;
@@ -290,6 +255,8 @@ export class AccountType {
                     args.roleid,
                     args.id,
                 ];
+
+                if (!isAuthentic(context.user)) throw new Error("Unauthorized");
 
                 return db
                     .oneOrNone(query, values)
@@ -303,11 +270,13 @@ export class AccountType {
             args: {
                 id: { type: GraphQLNonNull(GraphQLInt) },
             },
-            resolve: async (input, args) => {
+            resolve: async (input, args, context) => {
                 const query = `DELETE FROM wwi.account 
                 WHERE id = $1`;
 
                 const values = [args.id];
+
+                if (!isAuthentic(context.user)) throw new Error("Unauthorized");
 
                 return db
                     .oneOrNone(query, values)
@@ -322,21 +291,19 @@ export class AccountType {
                 id: { type: GraphQLNonNull(GraphQLInt) },
                 verified: { type: GraphQLNonNull(GraphQLBoolean) },
             },
-            resolve: async (input, args) => {
+            resolve: async (input, args, context) => {
                 const query = `UPDATE wwi.account 
                 SET verified = $2
                 WHERE id = $1 RETURNING id`;
 
-                const values = [
-                    args.id, args.verified
-                ];
+                const values = [args.id, args.verified];
 
                 return db
                     .oneOrNone(query, values)
                     .then((res) => res)
                     .catch((err) => err);
             },
-        })
+        }),
     };
 }
 
