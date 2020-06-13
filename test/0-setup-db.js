@@ -4,7 +4,6 @@ import { db } from "../src/pg-adapter.js";
 
 const { describe, it } = mocha;
 const { expect } = chai;
-const salt = 10;
 
 describe("Database", () => {
     describe("Clean role and account", () => {

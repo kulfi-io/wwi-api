@@ -10,6 +10,7 @@ export const Mutation = new graphql.GraphQLObjectType({
     fields: () => ({
         addAccount: AccountType.mutations.add(),
         updateAccount: AccountType.mutations.update(),
+        verify: AccountType.mutations.verify(),
         deleteAccount: AccountType.mutations.delete(),
         addRole: RoleType.mutations.add(),
         updateRole: RoleType.mutations.update(),
@@ -17,7 +18,6 @@ export const Mutation = new graphql.GraphQLObjectType({
         addClaim: ClaimType.mutations.add(),
         addRoleClaim: RoleClaimType.mutations.add(),
         deleteRoleClaim: RoleClaimType.mutations.delete()
-
     }),
 });
 

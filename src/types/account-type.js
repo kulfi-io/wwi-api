@@ -2,7 +2,10 @@ import graphql from "graphql";
 import RoleType from "./role-type.js";
 import { db } from "../pg-adapter.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import env from "dotenv";
 
+env.config();
 const {
     GraphQLObjectType,
     GraphQLInt,
@@ -14,6 +17,47 @@ const {
 } = graphql;
 
 const salt = 10;
+
+
+const validateAndGenerateToken = (args, result) => {
+
+    const _model = {
+        id: -1,
+        fullname: null,
+        token: null,
+        message: null,
+    };
+
+    if(!result) return _model;
+
+    if (!result.verified) {
+        _model.message = "Please verify your registration";
+        return _model;
+    }
+
+    const same = bcrypt.compareSync(args.password, result.password);
+
+    if(!same) {
+        _model.message = "Username password mistmatch";
+        return _model;
+    }
+
+    const _items = result.items;
+    const _email = result.email;
+
+    const token = jwt.sign(
+        {_email, _items},
+        process.env.SECRET,
+        {expiresIn: '1d'}
+    );
+
+    _model.id = result.id;
+    _model.fullname = result.fullname;
+    _model.token = token;
+
+    return _model;
+
+};
 
 export class AccountType {
     model = new GraphQLObjectType({
@@ -32,16 +76,14 @@ export class AccountType {
         },
     });
 
+
     loginModel = new GraphQLObjectType({
         name: "Login",
         type: "Query",
         fields: {
             id: { type: GraphQLInt },
-            firstname: { type: GraphQLString },
-            email: { type: GraphQLString },
             fullname: { type: GraphQLString },
-            verified: { type: GraphQLBoolean },
-            role: { type: RoleType.model },
+            token: { type: GraphQLString },
             message: { type: GraphQLString },
         },
     });
@@ -170,69 +212,18 @@ export class AccountType {
                 password: { type: GraphQLNonNull(GraphQLString) },
             },
             resolve: async (input, args) => {
-                const query = `SELECT a.id, a.firstname, a.lastname, a.email, a.verified, a.password, a.roleid, r.display, r.description
-                FROM wwi.account a INNER JOIN wwi.role r
-                ON a.roleId = r.id
-                WHERE a.email =  $1`;
+                const query = `SELECT id, concat(firstname, ' ', lastname) as fullname,
+                email, verified, password, wwi.get_account_claims($1) as items 
+                FROM wwi.account 
+                WHERE email = $1`
 
                 const values = [args.email];
 
                 return db
                     .one(query, values)
                     .then((res) => {
-                        if (res !== null) {
-                            let result;
-                            const same = bcrypt.compareSync(
-                                args.password,
-                                res.password
-                            );
-
-                            if (!res.verified) {
-                                result = {
-                                    id: res.id,
-                                    firstname: res.firstname,
-                                    fullname: `${res.firstname} ${res.lastname}`,
-                                    email: res.email,
-                                    verified: res.verified,
-                                    role: {
-                                        id: res.roleid,
-                                        display: res.display,
-                                    },
-                                    message: "verification required",
-                                };
-
-                                return result;
-                            }
-
-                            if (same) {
-                                result = {
-                                    id: res.id,
-                                    firstname: res.firstname,
-                                    fullname: `${res.firstname} ${res.lastname}`,
-                                    email: res.email,
-                                    verified: res.verified,
-                                    role: {
-                                        id: res.roleid,
-                                        display: res.display,
-                                        description: res.description,
-                                    },
-                                };
-
-                                return result;
-                            } else {
-                                result = {
-                                    accountid: null,
-                                    firstname: null,
-                                    fullname: null,
-                                    email: null,
-                                    verified: null,
-                                    role: null,
-                                    message: "Unauthenticated",
-                                };
-
-                                return result;
-                            }
-                        } else return res;
+                        const result = validateAndGenerateToken(args, res);
+                        return result;
                     })
                     .catch((err) => err);
             },
@@ -253,7 +244,13 @@ export class AccountType {
                 const query = `INSERT INTO wwi.account(firstname, lastname, email, password, roleid) 
                 VALUES($1, $2, $3, $4, $5) RETURNING id`;
 
-                if(!args.firstname || !args.lastname || !args.password || !args.email || !args.roleid) {
+                if (
+                    !args.firstname ||
+                    !args.lastname ||
+                    !args.password ||
+                    !args.email ||
+                    !args.roleid
+                ) {
                     throw new Error("Invalid data");
                 }
 
@@ -318,6 +315,28 @@ export class AccountType {
                     .catch((err) => err);
             },
         }),
+
+        verify: () => ({
+            type: this.model,
+            args: {
+                id: { type: GraphQLNonNull(GraphQLInt) },
+                verified: { type: GraphQLNonNull(GraphQLBoolean) },
+            },
+            resolve: async (input, args) => {
+                const query = `UPDATE wwi.account 
+                SET verified = $2
+                WHERE id = $1 RETURNING id`;
+
+                const values = [
+                    args.id, args.verified
+                ];
+
+                return db
+                    .oneOrNone(query, values)
+                    .then((res) => res)
+                    .catch((err) => err);
+            },
+        })
     };
 }
 

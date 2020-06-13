@@ -128,6 +128,20 @@ describe("Account Mutations", () => {
         });
     });
 
+    describe("Verify", async () => {
+        const update = `mutation {
+            verify(id: 1, verified: ${true}) {id}
+          }`;
+
+        it("set that the account is verified", async () => {
+            const res = await request(app).post("/api").send({ query: update });
+
+            const data = JSON.parse(res.text).data.verify;
+            expect(res.status).equal(200);
+            expect(data.id).equal(1);
+        });
+    });
+
     describe("Delete", async () => {
         const query = `mutation { deleteAccount(id: 3) {id} }`;
 
