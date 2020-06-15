@@ -1,6 +1,10 @@
+add email generation capabilities
+add email send capabilities
+add authorization
+add authentication
+add roles and claims and related test
 add server middleware
-
-
+remove jest, use mocha instead
 create mutation resolver
     1.  add roleType mutations to resolver
     2.  add accountType mutations to resolver
