@@ -1,8 +1,17 @@
 import jwt from "jsonwebtoken";
 import env from "dotenv";
 import bcrypt from "bcrypt";
+import path from "path";
+import pug from "pug";
+import mailer from "nodemailer";
+import aws from "aws-sdk";
+import mjml2html from "mjml";
+
 
 env.config();
+const _basePath = process.cwd();
+const _templatePath = "/src/email-templates/views/templates";
+
 
 export const validateAndGenerateToken = (args, result) => {
     const _model = {
@@ -83,3 +92,37 @@ export const getUser = (header) => {
 
     return _user;
 };
+
+const emailTemplate = (template) => {
+
+    const _path = path.join(_basePath, _templatePath, `${template.name}.pug`)
+    const _rendered = pug.renderFile(_path, template.data);
+
+    return mjml2html(_rendered, {minify: true});
+}
+
+export const sendEmail = (template) => {
+
+    const _options = {
+        "accessKeyId": process.env.EMAIL_USER,
+        "secretAccessKey": process.env.EMAIL_PASS,
+        "region": process.env.EMAIL_REGION,
+    }
+
+    const html = emailTemplate(template).html;
+
+    const tranporter = mailer.createTransport({
+        SES: new aws.SES(_options),
+        sendingRate: 1
+    });
+
+    tranporter.sendMail({
+        from: process.env.EMAIL_SENDER,
+        to: template.to,
+        subject: template.subject,
+        html: html
+    }, (err, info) => {
+        console.log(info.response);
+    });
+
+}

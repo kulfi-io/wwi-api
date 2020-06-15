@@ -2,7 +2,7 @@ import graphql from "graphql";
 import RoleType from "./role-type.js";
 import { db } from "../pg-adapter.js";
 import bcrypt from "bcrypt";
-import { validateAndGenerateToken, isAuthentic } from "../util/index.js";
+import { validateAndGenerateToken, isAuthentic, sendEmail } from "../util/index.js";
 
 const {
     GraphQLObjectType,
@@ -225,11 +225,24 @@ export class AccountType {
                     args.roleid,
                 ];
 
-                if (!isAuthentic(context.user)) throw new Error("Unauthorized");
+                // if (!isAuthentic(context.user)) throw new Error("Unauthorized");
 
                 return db
                     .oneOrNone(query, values)
-                    .then((res) => res)
+                    .then((res) => {
+                        const _template = {
+                            name: 'register',
+                            to: args.email,
+                            subject: "Registration",
+                            data: {
+                                fullname: `${args.firstname} ${args.lastname}`
+                            }
+                        }
+
+                        sendEmail(_template);
+                        return res;
+
+                    })
                     .catch((err) => err);
             },
         }),
