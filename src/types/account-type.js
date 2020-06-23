@@ -1,4 +1,4 @@
-import graphql from "graphql";
+import * as graphql from "graphql";
 import RoleType from "./role-type.js";
 import { db } from "../pg-adapter.js";
 import bcrypt from "bcrypt";

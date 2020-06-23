@@ -2,12 +2,15 @@
   "name": "wwi-api",
   "version": "0.1.0",
   "description": "wwi-api created using node and graphql",
-  "main": "index.js",
+  "main": "dist/main.cjs.js",
+  "module": "dist/main.esm.js",
+  "browser": "dist/main.umd.js",
+  "outputDir": "dist",
   "scripts": {
-    "start": "node ./src/index.js",
-    "test": "mocha"
+    "start": "node index.js",
+    "test": "mocha",
+    "build": "rollup -c"
   },
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kulfi-io/wwi-api.git"
@@ -24,6 +27,7 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
+    "esm": "^3.2.25",
     "express": "^4.17.1",
     "express-graphql": "^0.9.0",
     "graphql": "^15.0.0",
@@ -37,5 +41,11 @@
     "chai": "^4.2.0",
     "mocha": "^7.2.0",
     "supertest": "^4.0.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "directories": {
+    "test": "test"
   }
 }

@@ -1,4 +1,4 @@
-import graphql from 'graphql';
+import * as graphql from 'graphql';
 import AccountType from "../types/account-type.js";
 import RoleType from "../types/role-type.js";
 import ClaimType from "../types/claim-type.js";

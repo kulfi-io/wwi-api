@@ -1,4 +1,4 @@
-import grapql from "graphql";
+import * as grapql from "graphql";
 import { db } from "../pg-adapter.js";
 import { isAuthenticAdmin } from "../util/index.js";
 

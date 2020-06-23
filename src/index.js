@@ -1,17 +1,9 @@
 import express from "express";
 import expressGraphQl from "express-graphql";
-import graphql from "graphql";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { getUser} from "./util/index.js";
-import { Query } from "./resolvers/query-resolver.js";
-import { Mutation } from "./resolvers/mutation-resolver.js";
-
-
-const schema = new graphql.GraphQLSchema({
-    query: Query,
-    mutation: Mutation,
-});
+import { schema } from "./resolvers/index.js";
+import { getUser } from "./util/index.js";
 
 const app = express();
 
