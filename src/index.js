@@ -1,9 +1,10 @@
 import express from "express";
-import expressGraphQl from "express-graphql";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { schema } from "./resolvers/index.js";
 import { getUser } from "./util/index.js";
+
+import { schema } from "./resolvers/index.js";
+import expressGraphQl from "express-graphql";
 
 const app = express();
 
