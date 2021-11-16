@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/kulfi-io/wwi-api#readme",
   "dependencies": {
-    "aws-sdk": "^2.696.0",
+    "aws-sdk": "^2.814.0",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
