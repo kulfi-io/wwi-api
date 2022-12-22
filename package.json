@@ -31,7 +31,7 @@
     "express": "^4.17.1",
     "express-graphql": "^0.9.0",
     "graphql": "^15.0.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mjml": "^4.6.3",
     "nodemailer": "^6.4.8",
     "pg-promise": "^10.5.6",
